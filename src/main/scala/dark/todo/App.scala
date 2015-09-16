@@ -7,7 +7,7 @@ import scala.scalajs.js.Any._
 import scala.scalajs.js.Dynamic.{global => g}
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.vuejs.Vue
+import scala.scalajs.vuejs.{VueCallback, Vue}
 
 import js.Dynamic.{literal => json}
 
@@ -15,10 +15,17 @@ object App extends JSApp {
 
   val todoStorage = g.todoStorage
 
-//  val filters = json (
-//    "all" -> {(todos: Dynamic) => todos},
-//    "active" -> {(todos: Dynamic) => todos)}
-//  )
+  val filters = json (
+    "all" -> {(todos: Dynamic) => todos},
+    "active" -> {(todos: Dynamic) =>
+      // TODO filter
+      todos
+    },
+    "completed" -> {(todos: Dynamic) =>
+      // TODO filter
+      todos
+    }
+  )
 
   @JSExport
   def main():Unit = {
@@ -32,12 +39,12 @@ object App extends JSApp {
       ),
       "watch" -> json(
         "todo" -> json(
-          "handler" -> {todos:Seq[Todo] => todoStorage.save(todos)},
+          "handler" -> {todos:js.Any => todoStorage.save(todos)},
           "deep" -> true
         )
       ),
       "computed" -> json( //TODO impl
-//        "filteredTodos" -> {}
+//        "filteredTodos" -> {() => filters}
 //        "remaining" -> {},
 //        "allDone" -> json(
 //          "get" -> {},
@@ -45,12 +52,23 @@ object App extends JSApp {
 //        )
       ),
       "methods" -> json (
-        "addTodo" -> {}
+        "addTodo" -> {() =>
+        }
+      ),
+      "directives" -> json(
+        "todo-focus" -> {(value: js.Any) =>
+          for {
+            _ <- Option(value)
+          } yield Vue.nextTick(new NextTickCallBack)
+        }
       )
     )
 
-    val app = new Vue(option)
-    g.hoge = app
+    g.app = new Vue(option)
+  }
+
+  class NextTickCallBack extends VueCallback {
+    override def apply(): Unit = g.app.el.focus()
   }
 }
 
