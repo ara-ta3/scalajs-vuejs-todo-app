@@ -1,23 +1,28 @@
 package dark.todo.storage
 
-import dark.todo.model.Todo
+import scala.scalajs.js
+import scala.scalajs.js._
+import scala.scalajs.js.annotation.JSExport
+import js.Dynamic.{literal => json}
 
-trait TodoStorage {
-  def save(todos: Seq[Todo]): Unit
-
-  def fetch: Seq[Todo]
-}
-
-class TodoStorageImpl extends TodoStorage {
-  import scala.scalajs.js.JSON
+class TodoStorage {
   import org.scalajs.dom.localStorage
-  import TodoStorageImpl._
+  import TodoStorage._
 
-  def save(todos: Seq[Todo]): Unit = localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+  val save: js.Function1[Dynamic, Unit] = {(todos: Dynamic) => localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))}
 
-  def fetch: Dynamic = JSON.parse(localStorage.getItem(STORAGE_KEY))
+  val fetch: js.Function0[Dynamic] = { () => JSON.parse(localStorage.getItem(STORAGE_KEY))}
 }
 
-object TodoStorageImpl {
+object TodoStorage extends JSApp {
   val STORAGE_KEY = "todos-vuejs"
+
+  @JSExport
+  override def main(): Unit = {
+    val storage = new TodoStorage
+    scala.scalajs.js.Dynamic.global.todoStorage = json(
+      "fetch" -> storage.fetch,
+      "save" -> storage.save
+    )
+  }
 }

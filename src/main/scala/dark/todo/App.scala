@@ -1,7 +1,6 @@
 package dark.todo
 
 import dark.todo.model.Todo
-import dark.todo.storage.TodoStorageImpl
 
 import scala.scalajs.js
 import scala.scalajs.js.Any._
@@ -14,14 +13,19 @@ import js.Dynamic.{literal => json}
 
 object App extends JSApp {
 
-  val todoStorage = new TodoStorageImpl
+  val todoStorage = g.todoStorage
+
+//  val filters = json (
+//    "all" -> {(todos: Dynamic) => todos},
+//    "active" -> {(todos: Dynamic) => todos)}
+//  )
 
   @JSExport
   def main():Unit = {
     val option = json(
       "el" -> ".todoapp",
-      "data" -> js.Dynamic.literal(
-        "todos" -> todoStorage.fetch.toString, //FIXME Dynamic
+      "data" -> json(
+        "todos" -> todoStorage.fetch,
         "newTodo" -> "",
         "editedTodo" -> null,
         "visibility" -> "all"
@@ -33,16 +37,20 @@ object App extends JSApp {
         )
       ),
       "computed" -> json( //TODO impl
-        "filteredTodos" -> {},
-        "remaining" -> {},
-        "allDone" -> json(
-          "get" -> {},
-          "set" -> {value:Boolean => ()}
-        )
+//        "filteredTodos" -> {}
+//        "remaining" -> {},
+//        "allDone" -> json(
+//          "get" -> {},
+//          "set" -> {value:Boolean => ()}
+//        )
+      ),
+      "methods" -> json (
+        "addTodo" -> {}
       )
     )
 
     val app = new Vue(option)
+    g.hoge = app
   }
 }
 
