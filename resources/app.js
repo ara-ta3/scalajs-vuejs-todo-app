@@ -3,11 +3,12 @@
     dark.todo.storage.TodoStorage().main();
 })();
 (function() {
+    Vue.config.debug = true;
     dark.todo.App().main();
 })();
 
-///*global Vue, todoStorage */
-//
+/*global Vue, todoStorage */
+
 //(function (exports) {
 //
 //	'use strict';

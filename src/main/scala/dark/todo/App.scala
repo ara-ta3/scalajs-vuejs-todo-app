@@ -1,70 +1,58 @@
 package dark.todo
 
-import dark.todo.model.Todo
-
+import scala.scalajs.js.Dynamic
 import scala.scalajs.js
 import scala.scalajs.js.Any._
-import scala.scalajs.js.Dynamic.{global => g}
+import scala.scalajs.js.Dynamic.{global => g, literal => json}
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.annotation.JSExport
-import scala.scalajs.vuejs.{VueCallback, Vue}
-
-import js.Dynamic.{literal => json}
+import scala.scalajs.vuejs.{Vue, VueCallback}
 
 object App extends JSApp {
 
   val todoStorage = g.todoStorage
-
-  val filters = json (
-    "all" -> {(todos: Dynamic) => todos},
-    "active" -> {(todos: Dynamic) =>
-      // TODO filter
-      todos
-    },
-    "completed" -> {(todos: Dynamic) =>
-      // TODO filter
-      todos
-    }
-  )
 
   @JSExport
   def main():Unit = {
     val option = json(
       "el" -> ".todoapp",
       "data" -> json(
-        "todos" -> todoStorage.fetch,
+        "todos" -> todoStorage.fetch(),
         "newTodo" -> "",
         "editedTodo" -> null,
         "visibility" -> "all"
       ),
       "watch" -> json(
-        "todo" -> json(
+        "todos" -> json(
           "handler" -> {todos:js.Any => todoStorage.save(todos)},
           "deep" -> true
         )
       ),
-      "computed" -> json( //TODO impl
-//        "filteredTodos" -> {() => filters}
-//        "remaining" -> {},
-//        "allDone" -> json(
-//          "get" -> {},
-//          "set" -> {value:Boolean => ()}
-//        )
-      ),
       "methods" -> json (
-        "addTodo" -> {() =>
-        }
-      ),
-      "directives" -> json(
-        "todo-focus" -> {(value: js.Any) =>
-          for {
-            _ <- Option(value)
-          } yield Vue.nextTick(new NextTickCallBack)
-        }
+        "addTodo" -> addTodo,
+        "removeTodo" -> removeTodo,
+        "removeCompleted" -> removeCompleted
       )
     )
 
     g.app = new Vue(option)
+  }
+
+  private val addTodo: () => Unit = {() => {
+    val t = g.app
+    val newTodo:String = t.newTodo.toString
+    if( newTodo.length > 0 ) {
+      t.todos.push(json("title" -> newTodo, "completed" -> false))
+      t.newTodo = ""
+    }
+  }}
+
+  private val removeCompleted: () => Unit = {() =>
+
+  }
+
+  private val removeTodo: Dynamic => Unit = {todo =>
+    g.app.todos.$remove(todo)
   }
 
   class NextTickCallBack extends VueCallback {
