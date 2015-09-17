@@ -9,9 +9,15 @@ class TodoStorage {
   import org.scalajs.dom.localStorage
   import TodoStorage._
 
-  val save: js.Function1[Dynamic, Unit] = {(todos: Dynamic) => localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))}
+  val save: js.Function1[js.Array[Dynamic], Unit] = {(todos: js.Array[Dynamic]) => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(todos))
+  }}
 
-  val fetch: js.Function0[Dynamic] = { () => JSON.parse(localStorage.getItem(STORAGE_KEY))}
+  val fetch: js.Function0[js.Any] = { () =>
+    Option(JSON.parse(localStorage.getItem(STORAGE_KEY)))
+      .getOrElse(js.Array())
+
+  }
 }
 
 object TodoStorage extends JSApp {
