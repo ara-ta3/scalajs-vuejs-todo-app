@@ -24,39 +24,37 @@ object App extends JSApp {
       ),
       "watch" -> json(
         "todos" -> json(
-          "handler" -> {todos:js.Any => todoStorage.save(todos)},
+          "handler" -> { todos:Dynamic => todoStorage.save(todos) },
           "deep" -> true
         )
       ),
       "methods" -> json (
-        "addTodo" -> addTodo,
-        "removeTodo" -> removeTodo,
-        "removeCompleted" -> removeCompleted
+        "addTodo" -> {() => {
+          val t = g.app
+          val newTodo:String = t.newTodo.toString
+          if( newTodo.length > 0 ) {
+            t.todos.push(json("title" -> newTodo, "completed" -> false))
+            t.newTodo = ""
+          }
+        }},
+        "removeTodo" -> {todo: Dynamic => g.app.todos.$remove(todo)},
+        "removeCompleted" -> {() =>
+          // TODO impl
+        }
+      ),
+      "directives" -> json(
+        "todo-focus" -> {value:Dynamic =>
+          if( !js.isUndefined(value) && !js.isUndefined(g.app)) {
+            g.console.log(value)
+            Vue.nextTick({() =>
+              g.app.$el.focus()
+            })
+          }
+        }
       )
     )
 
     g.app = new Vue(option)
-  }
-
-  private val addTodo: () => Unit = {() => {
-    val t = g.app
-    val newTodo:String = t.newTodo.toString
-    if( newTodo.length > 0 ) {
-      t.todos.push(json("title" -> newTodo, "completed" -> false))
-      t.newTodo = ""
-    }
-  }}
-
-  private val removeCompleted: () => Unit = {() =>
-
-  }
-
-  private val removeTodo: Dynamic => Unit = {todo =>
-    g.app.todos.$remove(todo)
-  }
-
-  class NextTickCallBack extends VueCallback {
-    override def apply(): Unit = g.app.el.focus()
   }
 }
 

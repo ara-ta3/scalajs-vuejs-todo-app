@@ -87,7 +87,7 @@ object Vue extends js.Object {
   def component(id: String, definition: Vue): Unit = js.native
   def transition(id: String, definition: js.Any = ???): Unit = js.native
   def partial(id: String, definition: String = ???): Unit = js.native
-  def nextTick(callback: VueCallback): Unit = js.native
+  def nextTick(callback: js.Any): Unit = js.native
   def require(module: String): Unit = js.native
   def use(plugin: js.Any, args: js.Any*): Vue = js.native
 }
